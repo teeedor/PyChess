@@ -24,6 +24,30 @@ def create_pieces():
     return pieces
 
 
+# read_move - read the coords for piece to move from user - Return a tuple of the move
+def read_move(pieces):
+    while True:
+        print('Which piece would you like to move?')
+        x1 = input("X coord: ")
+        y1 = input("Y coord: ")
+        if check_loc(pieces, x1, y1):
+            print('Which location would you like to move to?')
+            x2 = input("X coord: ")
+            y2 = input("Y coord: ")
+            move_attempt = (x1, y1, x2, y2)
+            return move_attempt
+        else:
+            print("There is no piece at that location. Please choose again. ")
+
+
+# Check_loc - Verifies that there is a piece at the given location
+def check_loc(pieces, x, y):
+    for p in pieces:
+        if p[2] == x and p[3] == y:
+            return True
+    return False
+
+
 # Move - Check to see if it captures, check to see if there is a piece in the way
 def move(pieces, x1, y1, x2, y2):
     # True - is capturing / False - Not Capturing
@@ -33,8 +57,16 @@ def move(pieces, x1, y1, x2, y2):
     # True - good path / False - bad path
     path = check_path(pieces, x1, y1, x2, y2)
     if capture and move_check and path:
-        print("this")
+        print("Moving Piece from (x1,y1) to (x2,y2)")
         # make the move and change the board
+
+
+# check_capture - is the piece moving into another pieces space?
+def check_capture(pieces, x1, y1, x2, y2):
+    for p in pieces:
+        if p[2] == x2 and p[3] == y2:
+            return True
+    return False
 
 
 # check_move - Checks that the move is within the moveset
@@ -61,13 +93,9 @@ def check_move(pieces, x1, y1, x2, y2):
     #     inset = queen_ms(p1[0], x1, y1, x2, y2)
 
 
-# check_capture - is the piece moving into another pieces space?
-def check_capture(pieces, x1, y1, x2, y2):
-    for p in pieces:
-        if p[2] == x2 and p[3] == y2:
-            return True
-    return False
-
+# check_path - Checks the path between movements
+def check_path(pieces, x1, y1, x2, y2):
+    print('this')
 
 # MOVESETS
 # Basic movements,  no capturing yet
@@ -85,35 +113,6 @@ def pawn_ms(color, x1, y1, x2, y2):
 # def bishop_ms
 # def king_ms
 # def queen_ms
-
-
-# check_path - Checks the path between movements
-def check_path(pieces, x1, y1, x2, y2):
-    print('this')
-
-
-# Check_loc - Verifies that there is a piece at the given location
-def check_loc(pieces, x, y):
-    for p in pieces:
-        if p[2] == x and p[3] == y:
-            return True
-    return False
-
-
-# read_move - read the coords for piece to move from user
-def read_move(pieces):
-    while True:
-        print('Which piece would you like to move?')
-        x1 = input("X coord: ")
-        y1 = input("Y coord: ")
-        if check_loc(pieces, x1, y1):
-            print('Which location would you like to move to?')
-            x2 = input("X coord: ")
-            y2 = input("Y coord: ")
-            move = (x1, y1, x2, y2)
-            return move
-        else:
-            print("There is no piece at that location. Please choose again. ")
 
 
 def rotate_turn(turn):
