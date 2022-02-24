@@ -9,6 +9,12 @@
 
 # functions
 # create pieces - create a list with the starting chess pieces
+# NEED TO REWRITE WITH NEW PIECE OBJECT
+
+from Piece import *
+from move_sets import *
+
+
 def create_pieces():
     pieces = [('w', 'p', 1, 2), ('w', 'p', 2, 2), ('w', 'p', 3, 2), ('w', 'p', 4, 2),
               ('w', 'p', 5, 2), ('w', 'p', 6, 2), ('w', 'p', 7, 2), ('w', 'p', 8, 2),
@@ -31,6 +37,8 @@ def read_move(pieces):
         x1 = input("X coord: ")
         y1 = input("Y coord: ")
         if check_loc(pieces, x1, y1):
+            p = get_piece(pieces, x1, y1)
+            display_piece(p)
             print('Which location would you like to move to?')
             x2 = input("X coord: ")
             y2 = input("Y coord: ")
@@ -40,6 +48,31 @@ def read_move(pieces):
             print("There is no piece at that location. Please choose again. ")
 
 
+# Display the chosen piece in a pleasant way
+def display_piece(p):
+    # check for color
+    if p[0] == 'w':
+        color = 'White'
+    else:
+        color = 'Black'
+    # check for piece
+    if p[1] == 'p':
+        p_type = 'Pawn'
+    if p[1] == 'r':
+        p_type = 'Rook'
+    if p[1] == 'h':
+        p_type = 'Knight'
+    if p[1] == 'b':
+        p_type = 'Bishop'
+    if p[1] == 'k':
+        p_type = 'King'
+    if p[1] == 'q':
+        p_type = 'Queen'
+
+    print("Color: {} / Type: {} / X Pos: {} / Y Pos: {}".format(color, p_type, p[2], p[3]))
+    return 0
+
+
 # Check_loc - Verifies that there is a piece at the given location
 def check_loc(pieces, x, y):
     for p in pieces:
@@ -47,6 +80,13 @@ def check_loc(pieces, x, y):
             return True
     return False
 
+
+# search for the piece at the input location and return that tuple
+def get_piece(pieces, x, y):
+    for p in pieces:
+        if p[2] == x and p[3] == y:
+            return p
+    print('no piece here (get_piece())')
 
 # Move - Check to see if it captures, check to see if there is a piece in the way
 def move(pieces, x1, y1, x2, y2):
@@ -61,6 +101,7 @@ def move(pieces, x1, y1, x2, y2):
         # make the move and change the board
 
 
+# Maybe move to Piece Class
 # check_capture - is the piece moving into another pieces space?
 def check_capture(pieces, x1, y1, x2, y2):
     for p in pieces:
@@ -68,7 +109,7 @@ def check_capture(pieces, x1, y1, x2, y2):
             return True
     return False
 
-
+# Maybe move to Piece Class
 # check_move - Checks that the move is within the moveset
 def check_move(pieces, x1, y1, x2, y2):
     p1 = 0
@@ -93,26 +134,10 @@ def check_move(pieces, x1, y1, x2, y2):
     #     inset = queen_ms(p1[0], x1, y1, x2, y2)
 
 
+# Maybe move to Piece Class
 # check_path - Checks the path between movements
 def check_path(pieces, x1, y1, x2, y2):
     print('this')
-
-# MOVESETS
-# Basic movements,  no capturing yet
-def pawn_ms(color, x1, y1, x2, y2):
-    if (color == 'w') and (y1 == 2) and (y1 == y2-2):
-        return True
-    if (color == 'w') and (y1 == (y2-1)):
-        return True
-    if (color == 'b') and (y1 == 7) and (y1 == y2+2):
-        return True
-    if (color == 'b') and (y1 == (y2+1)):
-        return True
-# def rook_ms
-# def horse_ms
-# def bishop_ms
-# def king_ms
-# def queen_ms
 
 
 def rotate_turn(turn):
