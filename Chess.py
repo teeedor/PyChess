@@ -15,37 +15,51 @@ from Piece import *
 from move_sets import *
 
 
-def create_pieces():
-    pieces = [('w', 'p', 1, 2), ('w', 'p', 2, 2), ('w', 'p', 3, 2), ('w', 'p', 4, 2),
-              ('w', 'p', 5, 2), ('w', 'p', 6, 2), ('w', 'p', 7, 2), ('w', 'p', 8, 2),
+# modify this to make different boards for testing
+def create_pieces(choice):
+    if choice == 1:
+        pieces = [('w', 'p', 1, 6), ('w', 'p', 2, 2), ('w', 'p', 3, 2), ('w', 'p', 4, 2),
+                  ('w', 'p', 5, 2), ('w', 'p', 6, 2), ('w', 'p', 7, 2), ('w', 'p', 8, 2),
 
-              ('w', 'r', 1, 1), ('w', 'h', 2, 1), ('w', 'b', 3, 1), ('w', 'q', 4, 1),
-              ('w', 'k', 5, 1), ('w', 'b', 6, 1), ('w', 'h', 7, 1), ('w', 'r', 8, 1),
+                  ('w', 'r', 1, 1), ('w', 'h', 2, 1), ('w', 'b', 3, 1), ('w', 'q', 4, 1),
+                  ('w', 'k', 5, 1), ('w', 'b', 6, 1), ('w', 'h', 7, 1), ('w', 'r', 8, 1),
 
-              ('b', 'p', 1, 7), ('b', 'p', 2, 7), ('b', 'p', 3, 7), ('b', 'p', 4, 7),
-              ('b', 'p', 5, 7), ('b', 'p', 6, 7), ('b', 'p', 7, 7), ('b', 'p', 8, 7),
+                  ('b', 'p', 1, 7), ('b', 'p', 2, 7), ('b', 'p', 3, 7), ('b', 'p', 4, 7),
+                  ('b', 'p', 5, 7), ('b', 'p', 6, 7), ('b', 'p', 7, 7), ('b', 'p', 8, 7),
 
-              ('b', 'r', 1, 8), ('b', 'h', 2, 8), ('b', 'b', 3, 8), ('b', 'q', 4, 8),
-              ('b', 'k', 5, 8), ('b', 'b', 6, 8), ('b', 'h', 7, 8), ('b', 'r', 8, 8)]
+                  ('b', 'r', 1, 8), ('b', 'h', 2, 8), ('b', 'b', 3, 8), ('b', 'q', 4, 8),
+                  ('b', 'k', 5, 8), ('b', 'b', 6, 8), ('b', 'h', 7, 8), ('b', 'r', 8, 8)]
+
+    if choice == 2:
+        pieces = [('w', 'k', 4, 4), ('b', 'k', 5, 5)]
+
+    if choice == 3:
+        pieces = [('w', 'h', 1, 1), ('b', 'b', 5, 6),('w', 'k', 8, 8), ('b', 'k', 1, 1)]
+
     return pieces
 
 
-# read_move - read the coords for piece to move from user - Return a tuple of the move
-def read_move(pieces):
+# read_move - read the coords for piece to move  - Return a tuple of the move
+def read_move(pieces, turn):
     while True:
+        if turn == 'w':
+            color = 'White'
+        else:
+            color = 'Black'
+        print('---------------------------------------')
+        print("It is {}'s turn".format(color))
         print('Which piece would you like to move?')
         x1 = input("X coord: ")
         y1 = input("Y coord: ")
-        if check_loc(pieces, x1, y1):
-            p = get_piece(pieces, x1, y1)
+        if check_color(pieces, turn, x1, y1):  # check for the right color and existence
+            p = get_piece(pieces, x1, y1)  # retrieve the piece
             display_piece(p)
             print('Which location would you like to move to?')
             x2 = input("X coord: ")
             y2 = input("Y coord: ")
+
             move_attempt = (x1, y1, x2, y2)
             return move_attempt
-        else:
-            print("There is no piece at that location. Please choose again. ")
 
 
 # Display the chosen piece in a pleasant way
@@ -73,71 +87,98 @@ def display_piece(p):
     return 0
 
 
-# Check_loc - Verifies that there is a piece at the given location
-def check_loc(pieces, x, y):
+# Check_loc - Verifies that there is a piece at the given location of the correct color
+def check_color(pieces, turn, x, y):
     for p in pieces:
         if p[2] == x and p[3] == y:
-            return True
+            if turn == p[0]:
+                return True
+            else:
+                print("Wrong players turn (check_color())")
+                return False
+    print("There is no piece at that location. Please choose again. ")
     return False
 
 
-# search for the piece at the input location and return that tuple
+# search for the piece at the input location and return that tuple return a tuple of n, n, 0, 0 on no
 def get_piece(pieces, x, y):
     for p in pieces:
         if p[2] == x and p[3] == y:
             return p
-    print('no piece here (get_piece())')
+    n = ('n', 'n', 0, 0)
+    return n
+
 
 # Move - Check to see if it captures, check to see if there is a piece in the way
-def move(pieces, x1, y1, x2, y2):
+def move(pieces, turn, x1, y1, x2, y2):
+    # True - spaces are within the board, False outside board
+
     # True - is capturing / False - Not Capturing
-    capture = check_capture(pieces, x2, y2)
+    capture = check_capture(pieces, x1, y1, x2, y2)
+    if capture:
+        print('Capturing')
+    else:
+        print('Regular Move')
+
     # Check against the piece moveset
-    move_check = check_move(pieces, x1, y1, x2, y2)
+    move_check = check_move(pieces, capture, x1, y1, x2, y2)
+    if move_check:
+        print('valid move')
+    else:
+        print('bad move')
+
     # True - good path / False - bad path
     path = check_path(pieces, x1, y1, x2, y2)
     if capture and move_check and path:
         print("Moving Piece from (x1,y1) to (x2,y2)")
         # make the move and change the board
+        return True
 
 
 # Maybe move to Piece Class
-# check_capture - is the piece moving into another pieces space?
+# check_capture - is the piece moving into another pieces space of the other color?
 def check_capture(pieces, x1, y1, x2, y2):
-    for p in pieces:
-        if p[2] == x2 and p[3] == y2:
+    # get both pieces and compare their values
+    p1 = get_piece(pieces, x1, y1)
+    p2 = get_piece(pieces, x2, y2)  # might be empty space
+    if p2[0] == 'n':
+        return False
+    else:
+        if p1[0] != p2[0]:
             return True
-    return False
+        else:  # same color
+            return False
+
 
 # Maybe move to Piece Class
 # check_move - Checks that the move is within the moveset
-def check_move(pieces, x1, y1, x2, y2):
-    p1 = 0
-    # find the starting piece
-    for p in pieces:
-        if (p[2] == x1) and (p[3] == y1):
-            p1 = p
-            print(p1)
-    # Check to see if it is a valid move for the piece
+def check_move(pieces, capture, x1, y1, x2, y2):
+    p1 = get_piece(pieces, x1, y1)
     if p1[1] == 'p':
-        inset = pawn_ms(p1[0], x1, y1, x2, y2)
-    #
+        inset = pawn_ms(p1[0], capture, x1, y1, x2, y2)  # Check to see if it is a valid move for the piece
+        return inset
     # if p1[1] == 'r':
     #     inset = rook_ms(p1[0], x1, y1, x2, y2)
-    # if p1[1] == 'h':
-    #     inset = horse_ms(p1[0], x1, y1, x2, y2)
+    #     return inset
+    if p1[1] == 'h':
+        inset = horse_ms(x1, y1, x2, y2)
+        return inset
     # if p1[1] == 'b':
     #     inset = bishop_ms(p1[0], x1, y1, x2, y2)
-    # if p1[1] == 'k':
-    #     inset = king_ms(p1[0], x1, y1, x2, y2)
+    #     return inset
+    if p1[1] == 'k':
+        inset = king_ms(x1, y1, x2, y2)
+        return inset
     # if p1[1] == 'q':
     #     inset = queen_ms(p1[0], x1, y1, x2, y2)
+    #     return inset
 
 
 # Maybe move to Piece Class
 # check_path - Checks the path between movements
 def check_path(pieces, x1, y1, x2, y2):
-    print('this')
+    print('check_path() not yet implemented')
+    return False
 
 
 def rotate_turn(turn):
