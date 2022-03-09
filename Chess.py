@@ -18,23 +18,23 @@ from move_sets import *
 # modify this to make different boards for testing
 def create_pieces(choice):
     if choice == 1:
-        pieces = [('w', 'p', 1, 6), ('w', 'p', 2, 2), ('w', 'p', 3, 2), ('w', 'p', 4, 2),
+        # full board reset
+        pieces = [('w', 'p', 1, 2), ('w', 'p', 2, 2), ('w', 'p', 3, 2), ('w', 'p', 4, 2),
                   ('w', 'p', 5, 2), ('w', 'p', 6, 2), ('w', 'p', 7, 2), ('w', 'p', 8, 2),
-
                   ('w', 'r', 1, 1), ('w', 'h', 2, 1), ('w', 'b', 3, 1), ('w', 'q', 4, 1),
                   ('w', 'k', 5, 1), ('w', 'b', 6, 1), ('w', 'h', 7, 1), ('w', 'r', 8, 1),
-
                   ('b', 'p', 1, 7), ('b', 'p', 2, 7), ('b', 'p', 3, 7), ('b', 'p', 4, 7),
                   ('b', 'p', 5, 7), ('b', 'p', 6, 7), ('b', 'p', 7, 7), ('b', 'p', 8, 7),
-
                   ('b', 'r', 1, 8), ('b', 'h', 2, 8), ('b', 'b', 3, 8), ('b', 'q', 4, 8),
                   ('b', 'k', 5, 8), ('b', 'b', 6, 8), ('b', 'h', 7, 8), ('b', 'r', 8, 8)]
 
     if choice == 2:
+        # two piece board
         pieces = [('w', 'k', 4, 4), ('b', 'k', 5, 5)]
 
     if choice == 3:
-        pieces = [('w', 'h', 1, 1), ('b', 'b', 5, 6),('w', 'k', 8, 8), ('b', 'k', 1, 1)]
+        # 4 piece board
+        pieces = [('w', 'h', 1, 1), ('b', 'b', 5, 6), ('w', 'k', 8, 8), ('b', 'k', 7, 7)]
 
     return pieces
 
@@ -47,17 +47,22 @@ def read_move(pieces, turn):
         else:
             color = 'Black'
         print('---------------------------------------')
+        # print(pieces)
         print("It is {}'s turn".format(color))
         print('Which piece would you like to move?')
         x1 = input("X coord: ")
         y1 = input("Y coord: ")
+        # in python 3, input returns a string not an int
+        x1 = int(x1)
+        y1 = int(y1)
         if check_color(pieces, turn, x1, y1):  # check for the right color and existence
             p = get_piece(pieces, x1, y1)  # retrieve the piece
             display_piece(p)
             print('Which location would you like to move to?')
             x2 = input("X coord: ")
             y2 = input("Y coord: ")
-
+            x2 = int(x2)
+            y2 = int(y2)
             move_attempt = (x1, y1, x2, y2)
             return move_attempt
 
@@ -96,7 +101,7 @@ def check_color(pieces, turn, x, y):
             else:
                 print("Wrong players turn (check_color())")
                 return False
-    print("There is no piece at that location. Please choose again. ")
+    print("There is no piece at location ({}, {}). Please choose again. ".format(x, y))
     return False
 
 
@@ -110,29 +115,48 @@ def get_piece(pieces, x, y):
 
 
 # Move - Check to see if it captures, check to see if there is a piece in the way
-def move(pieces, turn, x1, y1, x2, y2):
-    # True - spaces are within the board, False outside board
+def move(pieces, x1, y1, x2, y2):
+    # True - spaces are within the board, False outside board - Tested
+    on_board = valid_loc(x1, y1, x2, y2)
+    if on_board:
+        on_board_string = 'On the Board'
+    else:
+        on_board_string = 'Not on the Board'
 
-    # True - is capturing / False - Not Capturing
+    # True - is capturing / False - Not Capturing - Tested
     capture = check_capture(pieces, x1, y1, x2, y2)
     if capture:
-        print('Capturing')
+        capture_string = 'Capturing'
     else:
-        print('Regular Move')
+        capture_string = 'Regular Move'
 
-    # Check against the piece moveset
+    # Check against the piece moveset - Needs the rest of the moveset to be written
     move_check = check_move(pieces, capture, x1, y1, x2, y2)
     if move_check:
-        print('valid move')
+        move_check_string = 'valid move'
     else:
-        print('bad move')
+        move_check_string = 'bad move'
 
     # True - good path / False - bad path
     path = check_path(pieces, x1, y1, x2, y2)
-    if capture and move_check and path:
-        print("Moving Piece from (x1,y1) to (x2,y2)")
+    check_path_string = 'Check_path Not implemented'
+    print("{} / {} / {} / {}".format(on_board_string, capture_string, move_check_string, check_path_string))
+
+    if on_board and capture and move_check and path:
+        print("Moving Piece from ({},{}) to ({},{})".format(x1, y1, x2, y2))
         # make the move and change the board
+        make_move(pieces, capture, x1, y1, x2, y2)
         return True
+
+
+# valid_loc - Checks that the moves are on the board
+def valid_loc(x1, y1, x2, y2):
+    if (x1 < 8) and (x1 > 0):
+        if (y1 < 8) and (y1 > 0):
+            if (x2 < 8) and (x2 > 0):
+                if (y2 < 8) and (y2 > 0):
+                    return True
+    return False
 
 
 # Maybe move to Piece Class
@@ -177,8 +201,26 @@ def check_move(pieces, capture, x1, y1, x2, y2):
 # Maybe move to Piece Class
 # check_path - Checks the path between movements
 def check_path(pieces, x1, y1, x2, y2):
-    print('check_path() not yet implemented')
     return False
+
+
+# make_move - move the pieces at the location in the data structure
+def make_move(pieces, capture, x1, y1, x2, y2):
+    # move the pieces
+    # change the x and y
+    if capture:
+            remove_piece(pieces, x2, y2)
+    return pieces
+
+
+# remove_piece - remove the piece from the input list, return the changed list
+def remove_piece(pieces, x, y):
+    i = 0
+    for p in pieces:
+        if p[2] == x and p[3] == y:
+            rp = pieces.pop(i)
+        i = i + 1
+    return pieces
 
 
 def rotate_turn(turn):
