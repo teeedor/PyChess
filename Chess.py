@@ -11,6 +11,8 @@
 # create pieces - create a list with the starting chess pieces
 # NEED TO REWRITE WITH NEW PIECE OBJECT
 
+
+import os
 from Piece import *
 from move_sets import *
 
@@ -92,6 +94,36 @@ def display_piece(p):
     return 0
 
 
+# display_board - This will display the board is an easy to read manner
+def display_board(board):
+    # print the board from top to bottom
+    # convert the board into a 2d array of values
+    border = "   -----------------  "
+    print(border)
+    for i in range(8):
+        # This will
+        display_line(board, i+1)
+    print("Y" + border)
+    print("  X 1 2 3 4 5 6 7 8 ")
+
+
+# display_line - Display the board one line at a time
+def display_line(pieces, lnnum):
+    ycord = 9 - lnnum
+    output = str(ycord) + "  |"
+    for i in range(8): # to get through each x space in y line
+        ns = " |" # default new string to be added after the entire list has been traversed
+        for p in pieces: # Check all pieces
+            if (p[2] == i+1) and (p[3] == ycord):
+                # Add this piece to the output string
+                if p[0] == 'w':
+                    ns = p[1].upper() + "|"
+                else:
+                    ns = p[1] + "|"
+        output += ns
+    print(output)
+
+
 # Check_loc - Verifies that there is a piece at the given location of the correct color
 def check_color(pieces, turn, x, y):
     for p in pieces:
@@ -130,23 +162,25 @@ def move(pieces, x1, y1, x2, y2):
     else:
         capture_string = 'Regular Move'
 
-    # Check against the piece moveset - Needs the rest of the moveset to be written
+    # Check against the piece moveset - Needs the rest of the moveset to be written PAWN, KNIGHT, KING TESTED
     move_check = check_move(pieces, capture, x1, y1, x2, y2)
     if move_check:
         move_check_string = 'valid move'
     else:
         move_check_string = 'bad move'
 
-    # True - good path / False - bad path
+    # True - good path / False - bad path _-_-_ Not Implemented, Defaults to True
     path = check_path(pieces, x1, y1, x2, y2)
     check_path_string = 'Check_path Not implemented'
-    print("{} / {} / {} / {}".format(on_board_string, capture_string, move_check_string, check_path_string))
+    print("{} / {} / {} / {}".format(on_board_string, capture_string, move_check_string, path))
 
-    if on_board and capture and move_check and path:
+    if on_board and move_check and path:
         print("Moving Piece from ({},{}) to ({},{})".format(x1, y1, x2, y2))
         # make the move and change the board
-        make_move(pieces, capture, x1, y1, x2, y2)
-        return True
+        new_board = make_move(pieces, capture, x1, y1, x2, y2)
+        return True, new_board
+    else:
+        return False, pieces
 
 
 # valid_loc - Checks that the moves are on the board
@@ -201,25 +235,33 @@ def check_move(pieces, capture, x1, y1, x2, y2):
 # Maybe move to Piece Class
 # check_path - Checks the path between movements
 def check_path(pieces, x1, y1, x2, y2):
-    return False
+    return True
 
 
 # make_move - move the pieces at the location in the data structure
 def make_move(pieces, capture, x1, y1, x2, y2):
-    # move the pieces
-    # change the x and y
+    # remove second piece if it exists
     if capture:
-            remove_piece(pieces, x2, y2)
+        pieces = remove_piece(pieces, x2, y2)
+    # change the x and y
+    for i, p in enumerate(pieces):
+        if p[2] == x1 and p[3] == y1:
+            # pop the tuple at index
+            rp = pieces.pop(i)
+            print("The piece removed is {}".format(rp))
+            # create new tuple with new x and y
+            new_piece = (rp[0], rp[1], x2, y2)
+            # insert the item
+            pieces.insert(i, new_piece)
+            print("{}, {} moved to {}, {}".format(x1, y1, pieces[i][2], pieces[i][3]))
     return pieces
 
 
 # remove_piece - remove the piece from the input list, return the changed list
 def remove_piece(pieces, x, y):
-    i = 0
-    for p in pieces:
+    for i, p in enumerate(pieces):
         if p[2] == x and p[3] == y:
             rp = pieces.pop(i)
-        i = i + 1
     return pieces
 
 
@@ -240,4 +282,10 @@ def no_winner(pieces):
         return True
 
 
-
+# clear() - This will clear the console so a new board can be drawn
+def clear():
+    command = 'clear'
+    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+        command = 'cls'
+    os.system(command)
+    
